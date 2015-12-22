@@ -23,13 +23,13 @@ object Build extends Build {
         )
     }
 
-    val tasks = Seq(installDepsTask, deployTask)
+    lazy val tasks = Seq(installDepsTask, deployTask)
 
     val installDeps = TaskKey[Unit]("install-deps", "Install unmanaged dependencies like leJOS")
-    lazy val installDepsTask = installDeps := { "./install.sh" ! }
+    val installDepsTask = installDeps := { "./install.sh" ! }
 
     val deploy = TaskKey[Unit]("deploy", "Deploy to EV3")
-    lazy val deployTask = deploy := { "scp target/scala-2.11/line-follower.jar ev3:/home/lejos/programs/" ! }
+    val deployTask = deploy := { "scp target/scala-2.11/line-follower.jar ev3:/home/lejos/programs/" ! }
 
     lazy val root = Project(
         "line-follower",
