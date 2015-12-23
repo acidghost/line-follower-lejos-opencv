@@ -12,13 +12,12 @@ object Build extends Build {
         scalacOptions := Seq("-encoding", "UTF-8", "-unchecked", "-deprecation", "-feature", "-target:jvm-1.7")
     )
 
-    lazy val jna = "net.java.dev.jna" % "jna" % "3.2.7" % "provided"
-    // lazy val opencv = "org.opencv" % "opencv" % "2.4.11"
-
-    def libSrc(base: File) = Seq(
-        base / "lejos" / "dbusjava" / "src",
-        base / "lejos" / "ev3classes" / "src"
+    lazy val ev3DepsSettings = Seq(
+        libraryDependencies ++= Seq(jna),
+        scalaSource in Compile := baseDirectory.value / "src"
     )
+
+    lazy val jna = "net.java.dev.jna" % "jna" % "3.2.7" % "provided"
 
     lazy val tasks = Seq(installDepsTask, deployTask)
 
@@ -35,12 +34,10 @@ object Build extends Build {
     ) dependsOn(ev3, pc) aggregate(ev3, pc)
 
     lazy val ev3: Project = Project(
-        id = "line-follower-ev3",
+        id = "ev3",
         base = file("ev3"),
-        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ tasks
+        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings
     ) settings(
-        libraryDependencies ++= Seq(jna),
-        unmanagedSourceDirectories in Compile ++= libSrc(baseDirectory.value / ".."),
         unmanagedBase := baseDirectory.value / ".." / "lib",
         exportJars := true,
         assemblyJarName in assembly := "line-follower-ev3.jar",
@@ -48,12 +45,24 @@ object Build extends Build {
         packageOptions in assembly += Package.ManifestAttributes(
             "Class-Path" -> "/home/root/lejos/libjna/usr/share/java/jna.jar"
         )
+    ) dependsOn ev3classes aggregate(ev3classes, dbusjava)
+
+    lazy val ev3classes = Project(
+        id = "ev3-classes",
+        base = file("lejos/ev3classes"),
+        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ ev3DepsSettings
+    ) dependsOn dbusjava
+
+    lazy val dbusjava = Project(
+        id = "dbus-java",
+        base = file("lejos/dbusjava"),
+        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ ev3DepsSettings
     )
 
     lazy val pc: Project = Project(
-        id = "line-follower-server",
+        id = "server",
         base = file("server"),
-        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ tasks
+        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings
     ) settings(
         exportJars := true,
         assemblyJarName in assembly := "line-follower-server.jar",
