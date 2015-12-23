@@ -12,7 +12,7 @@ object Build extends Build {
         scalacOptions := Seq("-encoding", "UTF-8", "-unchecked", "-deprecation", "-feature", "-target:jvm-1.7")
     )
 
-    lazy val ev3DepsSettings = Seq(
+    lazy val lejosDepsSettings = Seq(
         libraryDependencies ++= Seq(jna),
         scalaSource in Compile := baseDirectory.value / "src"
     )
@@ -31,7 +31,7 @@ object Build extends Build {
         id = "line-follower",
         base = file("."),
         settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ tasks
-    ) dependsOn(ev3, pc) aggregate(ev3, pc)
+    ) dependsOn(ev3, server) aggregate(ev3, server)
 
     lazy val ev3: Project = Project(
         id = "ev3",
@@ -50,16 +50,16 @@ object Build extends Build {
     lazy val ev3classes = Project(
         id = "ev3-classes",
         base = file("lejos/ev3classes"),
-        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ ev3DepsSettings
+        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ lejosDepsSettings
     ) dependsOn dbusjava
 
     lazy val dbusjava = Project(
         id = "dbus-java",
         base = file("lejos/dbusjava"),
-        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ ev3DepsSettings
+        settings = coreDefaultSettings ++ basicSettings ++ assemblySettings ++ lejosDepsSettings
     )
 
-    lazy val pc: Project = Project(
+    lazy val server: Project = Project(
         id = "server",
         base = file("server"),
         settings = coreDefaultSettings ++ basicSettings ++ assemblySettings
