@@ -4,7 +4,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor
 import lejos.hardware.port.MotorPort
 
 
-class PIDPilot(Kp: Double = 1, Ki: Double = .1, Kd: Double = 0) {
+class PIDPilot(Kp: Double = 2, Ki: Double = .5, Kd: Double = 0) {
 
 	private val leftMotor = new EV3LargeRegulatedMotor(MotorPort.B)
 	private val rightMotor = new EV3LargeRegulatedMotor(MotorPort.C)
@@ -20,6 +20,8 @@ class PIDPilot(Kp: Double = 1, Ki: Double = .1, Kd: Double = 0) {
 	def drive() = {
 		leftMotor.forward()
 		rightMotor.forward()
+		leftMotor.setSpeed(1)
+		rightMotor.setSpeed(1)
 	}
 
 	def land() = {
