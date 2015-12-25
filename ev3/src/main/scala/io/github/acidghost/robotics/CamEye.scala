@@ -3,7 +3,7 @@ package io.github.acidghost.robotics
 import java.util
 
 import org.opencv.core._
-import org.opencv.highgui.VideoCapture
+import org.opencv.highgui.{Highgui, VideoCapture}
 import org.opencv.imgproc.Imgproc
 
 import scala.collection.JavaConversions._
@@ -11,31 +11,30 @@ import scala.collection.JavaConversions._
 
 class CamEye {
 
-	val WIDTH = 320
-	val HEIGHT = 240
+	val WIDTH = 160
+	val HEIGHT = 120
 
 	private val capture: VideoCapture = new VideoCapture(0)
 	private val image = new Mat()
 
-	// FIXME
-	capture.set(3, WIDTH)
-	capture.set(4, HEIGHT)
-	// println(s"Set camera capture: ${capture.get(3)}x${capture.get(4)}\n")
+	capture.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, WIDTH)
+	capture.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, HEIGHT)
+
+	val erodeElmt = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3))
+	val dilateElmt = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5))
 
 	def getCenters: Option[Seq[Point]] = {
 		if (!capture.isOpened)
 			return None
 
 		capture.read(image)
-		Imgproc.resize(image, image, new Size(WIDTH, HEIGHT))
-		val roi = new Mat(image, new Rect(10, 2 * image.rows() / 3, image.cols() - 20, image.rows() / 12))
+		val roi = new Mat(image, new Rect(0, (HEIGHT / 2) - 40, WIDTH, 30))
 
 		Imgproc.cvtColor(roi, roi, Imgproc.COLOR_BGR2GRAY)
 		Imgproc.GaussianBlur(roi, roi, new Size(9, 9), 2, 2)
 		Imgproc.threshold(roi, roi, 0, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_OTSU)
-		val erodeElmt = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3))
+
 		Imgproc.erode(roi, roi, erodeElmt)
-		val dilateElmt = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5))
 		Imgproc.dilate(roi, roi, dilateElmt)
 
 		val contours = new util.ArrayList[MatOfPoint]()

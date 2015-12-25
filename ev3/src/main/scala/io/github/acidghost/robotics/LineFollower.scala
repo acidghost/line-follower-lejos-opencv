@@ -9,22 +9,27 @@ object LineFollower extends App {
 
 	System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
 
-	val ev3  = BrickFinder.getLocal.asInstanceOf[EV3]
-	val eye = new CamEye
-	val pilot = new PIDPilot
+	lazy val ev3  = BrickFinder.getLocal.asInstanceOf[EV3]
 
-	pilot.drive()
+	val eye = new CamEye
+	println("Eye started")
+
+	 val pilot = new PIDPilot
+	 pilot.drive()
+	 println("Pilot started")
 
 	while (Button.ESCAPE.isUp) {
+		val timer = System.currentTimeMillis()
 		eye.getCenters match {
 			case Some(centers) =>
 				val error = eye.getError(centers)
 				println(s"Found error: $error")
 				pilot.setError(error)
+				pilot.doPID()
+				println(s"Time: ${System.currentTimeMillis() - timer}")
 			case None =>
 				println("Camera not ready...")
 		}
-		println("\n\n")
 	}
 
 	pilot.land()
