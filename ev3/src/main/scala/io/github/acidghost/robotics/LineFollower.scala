@@ -9,26 +9,24 @@ object LineFollower extends App {
 
 	System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
 
-	lazy val ev3  = BrickFinder.getLocal.asInstanceOf[EV3]
+	lazy val ev3 = BrickFinder.getLocal.asInstanceOf[EV3]
 
 	val eye = new CamEye
 	println("Eye started")
 
-	 val pilot = new PIDPilot
-	 pilot.drive()
-	 println("Pilot started")
+	val pilot = new PIDPilot
+	pilot.drive()
+	println("Pilot started")
 
+	var timer = System.currentTimeMillis()
 	while (Button.ESCAPE.isUp) {
-		val timer = System.currentTimeMillis()
-		eye.getCenters match {
-			case Some(centers) =>
-				val error = eye.getError(centers)
-				println(s"Found error: $error")
-				pilot.setError(error)
-				pilot.doPID()
-				println(s"Time: ${System.currentTimeMillis() - timer}")
-			case None =>
-				println("Camera not ready...")
+		val error = eye.getError
+		if (error.isDefined) {
+			println(s"Found error: ${error.get}")
+			pilot.setError(error.get)
+			pilot.doPID()
+			println(s"Time: ${System.currentTimeMillis() - timer}")
+			timer = System.currentTimeMillis()
 		}
 	}
 
@@ -36,7 +34,7 @@ object LineFollower extends App {
 	eye.close()
 
 	def doHello() = {
-		val lcd  = ev3.getTextLCD
+		val lcd = ev3.getTextLCD
 		lcd.drawString("Hello World", 4, 3)
 		lcd.drawString("I'm a Scala app", 1, 4)
 		Button.waitForAnyPress()

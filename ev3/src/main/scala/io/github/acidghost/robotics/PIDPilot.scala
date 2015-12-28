@@ -4,7 +4,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor
 import lejos.hardware.port.MotorPort
 
 
-class PIDPilot(Kp: Double = 2, Ki: Double = .5, Kd: Double = 0) {
+class PIDPilot(Kp: Double = 50, Ki: Double = 3, Kd: Double = 0) {
 
 	private val leftMotor = new EV3LargeRegulatedMotor(MotorPort.B)
 	private val rightMotor = new EV3LargeRegulatedMotor(MotorPort.C)
@@ -30,7 +30,7 @@ class PIDPilot(Kp: Double = 2, Ki: Double = .5, Kd: Double = 0) {
 	}
 
 	def setError(error: Double) = {
-		this.error = (baseSpeed / 2) * error
+		this.error = error
 		lastErrorTime = errorTime
 		errorTime = System.currentTimeMillis()
 	}
